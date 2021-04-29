@@ -1,6 +1,6 @@
 from detectron2.engine import DefaultTrainer
 import detectron2.data.transforms as T
-from detectron2.data import DatasetMapper
+from detectron2.data import DatasetMapper, build_detection_train_loader
 
 import numpy as np
 
