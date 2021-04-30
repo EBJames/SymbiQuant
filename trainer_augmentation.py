@@ -27,4 +27,4 @@ class BuchneraTrainer(DefaultTrainer):
                                                                                             T.RandomContrast(0.5, 2),
                                                                                             T.RandomFlip(prob=0.5, horizontal=True, vertical=False),
                                                                                             T.RandomFlip(prob=0.5, horizontal=False, vertical=True),
-                                                                                            T.RandomScale(0.5,1.5)]))
+                                                                                            RandomScale(0.5,1.5)]))
