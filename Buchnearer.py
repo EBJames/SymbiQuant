@@ -1,6 +1,6 @@
 import torch, torchvision
 print(torch.__version__, torch.cuda.is_available())
-assert torch.__version__.startswith("1.7")
+#assert torch.__version__.startswith("1.7")
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -28,19 +28,16 @@ from detectron2.data import MetadataCatalog, DatasetCatalog
 cfg = get_cfg()
 cfg.merge_from_file(model_zoo.get_config_file("COCO-InstanceSegmentation/mask_rcnn_R_50_FPN_3x.yaml"))
 cfg.DATASETS.TRAIN = ("Buchnearer",)
-cfg.DATASETS.TEST = ()   # no metrics implemented for this dataset
-cfg.DATALOADER.NUM_WORKERS = 8 #number of cores loading an image at once - higher = faster, but more memory
-cfg.MODEL.WEIGHTS = model_zoo.get_checkpoint_url("COCO-InstanceSegmentation/mask_rcnn_R_50_FPN_3x.yaml")  # initialize from model zoo
-cfg.SOLVER.IMS_PER_BATCH = 2
-cfg.SOLVER.BASE_LR = 0.01 #If learn rate goes too low I get memory problems. I should look into optimization
-cfg.SOLVER.MAX_ITER = 40000 #80000 is the most I've run, it doesn't cause much difference, I could even step this back to ~10-20. I should run a loss curve though.
-cfg.MODEL.ROI_HEADS.BATCH_SIZE_PER_IMAGE = 1024   #reset from 100 in tutorial, #1024 in 20201103
+cfg.DATASETS.TEST = ()   
+cfg.DATALOADER.NUM_WORKERS = 8 
+cfg.MODEL.WEIGHTS = model_zoo.get_checkpoint_url("COCO-InstanceSegmentation/mask_rcnn_R_50_FPN_3x.yaml")
+cfg.SOLVER.BASE_LR = 0.01 
+cfg.SOLVER.MAX_ITER = 40000 
+cfg.MODEL.ROI_HEADS.BATCH_SIZE_PER_IMAGE = 1024 #1024 in 20201103
 cfg.MODEL.ROI_HEADS.NUM_CLASSES = 1 
 cfg.TEST.DETECTIONS_PER_IMAGE = 3000
 cfg.SOLVER.CHECKPOINT_PERIOD = 1000
-
-cfg.MODEL.WEIGHTS = "/home/xupan/Projects/Buchnearer/split_and_zoom_20201126.pth"
-
+cfg.MODEL.WEIGHTS = "/content/split_and_zoom_20201126.pth"
 cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.2   # set the testing threshold for this model, higher = more certainty but worse inclusion, lower = less certainty, but better inclusion
 cfg.TEST.DETECTIONS_PER_IMAGE = 5000 #max number of objects per image. 5000 should be overkill, I think there are rarely more than 2000
 cfg.DATASETS.TEST = ("Buchnearer", )
@@ -207,8 +204,8 @@ def Buchnearer_detector(input_file, output_file, predictor, visualize=False, sav
 
     filtered_boxes,filtered_masks,filtered_scores = delete_overlap(filtered_boxes,filtered_masks,filtered_scores)
     
-    f = open('/home/xupan/Projects/Buchnearer/Buchnearer_count.txt', "a")
-    f.write('Buchenearer count: {} '.format(len(filtered_masks)) + input_file + '\n')
+    f = open('/content/PIPE_count.txt', "a")
+    f.write('Buchenera count: {} '.format(len(filtered_masks)) + input_file + '\n')
     f.close()
     
     if visualize:
