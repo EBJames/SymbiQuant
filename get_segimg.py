@@ -3,7 +3,8 @@ import pickle
 import numpy as np
 import copy
 import hashlib
-
+import os
+from os.path import join
 _COLORS = np.array(
     [
         0.000, 0.447, 0.741,
@@ -87,26 +88,46 @@ def get_cellcount(result_file):
 
 '''
 # get new segmentation images:
-input_path = '/home/xupan/Projects/Buchnearer/test_image_by_age'
+input_path = '/Users/ed/Documents/UM/NN_outs/qc_check'
 for f in os.listdir(input_path):
-    age_folder = join(input_path, f)
+    age_folder = os.path.join(input_path, f)
     for im in os.listdir(age_folder):
         if im[-1] == 'g':
             print(im)
-            result_file = ... # find result here (maybe from "age_foler" & "im").
-            output_file = join(im,'_corrected.png') # change this
+            qcname = 'qc' + str(im[0:(len(im)-4)]) + '.result'
+            result_file = os.path.join(age_folder, qcname) # find result here (maybe from "age_foler" & "im").
+            output_file = os.path.join(im, '_qc.png') # change this
             get_segimg(im, result_file, output_file)
-'''
 
-'''
-# get cell count:
-count_file = ...
-input_path = '/home/xupan/Projects/Buchnearer/test_image_by_age'
+
+
+#get cell count:
+count_file = '/Users/ed/Documents/UM/NN_outs/qc_check/qc_check.txt'
+input_path = '/Users/ed/Documents/UM/NN_outs/qc_check'
 for f in os.listdir(input_path):
-    age_folder = join(input_path, f)
+    age_folder = os.path.join(input_path, f)
     for result in os.listdir(age_folder):
         if im[-1] == 'g':
             count = get_cellcount(result)
             with open(count_file, 'w') as f:
                 f.write(im + str(count) +'\n')
 '''
+count_file = '/Users/ed/Documents/UM/NN_outs/qc_check.txt'
+input_path = '/Users/ed/Documents/UM/NN_outs/qc_check'
+for f in os.listdir(input_path):
+    if f.startswith('.'):
+        print(f)
+    else:
+        age_folder = join(input_path, f)
+        for im in os.listdir(age_folder):
+            if im.startswith('.'):
+                print(im)
+            elif im[-1] == 'g':
+                print(im)
+                result_file = join(age_folder, 'Prediction/qc' + im[0:-3] + 'result') # find result here (maybe from "age_foler" & "im").
+                output_file = join(age_folder, 'Prediction/qc' + im) # change this
+                get_segimg(join(age_folder, im), result_file, output_file)
+                count = get_cellcount(result_file)
+                with open(count_file, 'a+') as f:
+                    print(count)
+                    f.write('qc' + im + ': ' + str(count) +'\n')
