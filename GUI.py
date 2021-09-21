@@ -8,8 +8,8 @@ from tkinter import ttk
 from tkinter.filedialog import asksaveasfile, askopenfilename
 from PIL import Image, ImageTk
 
-#from detectron2.utils.visualizer import Visualizer, ColorMode
-#from Buchnearer import random_color
+# from detectron2.utils.visualizer import Visualizer, ColorMode
+# from Buchnearer import random_color
 import cv2
 import numpy as np
 import pickle
@@ -90,7 +90,6 @@ def random_color(rgb=False, maximum=255):
         ret = ret[::-1]
     return ret
 
-
 class AutoScrollbar(ttk.Scrollbar):
     ''' A scrollbar that hides itself if it's not needed.
         Works only if you use the grid geometry manager '''
@@ -116,7 +115,7 @@ class Zoom_Advanced(ttk.Frame):
         self.image = cv2.imread(im_file)
         with open(result_file, 'rb') as dbfile:      
             self.result = pickle.load(dbfile) 
-
+        self.root = mainframe
         ttk.Frame.__init__(self, master=mainframe)
         self.master.title('Zoom with mouse wheel')
         # Vertical and horizontal scrollbars for canvas
@@ -163,6 +162,7 @@ class Zoom_Advanced(ttk.Frame):
         # self.segimage = Image.fromarray(self.visimage.get_image()[:, :, ::-1])
         self.segimage = self.__add_all_masks(self.image, self.masks, self.assigned_colors)
         self.imno = 1 # flag used for switch orignal or segmented images
+        self.delete_mode = -1 # flag used for switch between select mode and delete mode.
         self.width, self.height, _ = self.image.shape
         self.imscale = 1.0  # scale for the canvaas image
         self.delta = 1.3  # zoom magnitude
@@ -173,6 +173,7 @@ class Zoom_Advanced(ttk.Frame):
         minsize, maxsize, number = 5, 20, 10
         self.show_image()
         self.canvas.focus_set()  # set focus on the canvas
+        
 
     def __scroll_y(self, *args, **kwargs):
         ''' Scroll canvas vertically and redraw the image '''
@@ -205,36 +206,41 @@ class Zoom_Advanced(ttk.Frame):
                 return
 
     def __draw_oval_press(self, event):
+        if self.delete_mode == -1:
         # save mouse drag start position
-        self.oval_start_x_ = self.canvas.canvasx(event.x)
-        self.oval_start_y_ = self.canvas.canvasy(event.y)
-        self.oval_start_x = copy.deepcopy(event.x)
-        self.oval_start_y = copy.deepcopy(event.y)
-        # create rectangle if not yet exist
-        self.oval = self.canvas.create_oval(self.oval_start_x_, self.oval_start_y_, self.oval_start_x_+1, self.oval_start_y_+1, outline='red', width=2)
+            self.oval_start_x_ = self.canvas.canvasx(event.x)
+            self.oval_start_y_ = self.canvas.canvasy(event.y)
+            self.oval_start_x = copy.deepcopy(event.x)
+            self.oval_start_y = copy.deepcopy(event.y)
+            # create rectangle if not yet exist
+            self.oval = self.canvas.create_oval(self.oval_start_x_, self.oval_start_y_, self.oval_start_x_+1, self.oval_start_y_+1, outline='red', width=2)
+        else:
+            self.__delete(event)
 
     def __draw_oval_press_on_move(self, event):
-        self.oval_end_x_ = self.canvas.canvasx(event.x)
-        self.oval_end_y_ = self.canvas.canvasy(event.y)
-        self.oval_end_x = copy.deepcopy(event.x)
-        self.oval_end_y = copy.deepcopy(event.y)
-        # expand rectangle as you drag the mouse
-        self.canvas.coords(self.oval, self.oval_start_x_, self.oval_start_y_, self.oval_end_x_, self.oval_end_y_)
+        if self.delete_mode == -1:
+            self.oval_end_x_ = self.canvas.canvasx(event.x)
+            self.oval_end_y_ = self.canvas.canvasy(event.y)
+            self.oval_end_x = copy.deepcopy(event.x)
+            self.oval_end_y = copy.deepcopy(event.y)
+            # expand rectangle as you drag the mouse
+            self.canvas.coords(self.oval, self.oval_start_x_, self.oval_start_y_, self.oval_end_x_, self.oval_end_y_)
 
     def __release_draw_oval(self, event):
-        self.canvas.delete(self.oval)
-        bbox1 = self.canvas.bbox(self.container)  # get image area
-        bbox1 = (bbox1[0] + 1, bbox1[1] + 1, bbox1[2] - 1, bbox1[3] - 1)
-        bbox2 = (self.canvas.canvasx(0),  # get visible area of the canvas
-                 self.canvas.canvasy(0),
-                 self.canvas.canvasx(self.canvas.winfo_width()),
-                 self.canvas.canvasy(self.canvas.winfo_height()))
-        start_y = (self.oval_start_x+bbox2[0]-bbox1[0])/self.imscale
-        start_x = (self.oval_start_y+bbox2[1]-bbox1[1])/self.imscale
-        end_y = (self.oval_end_x+bbox2[0]-bbox1[0])/self.imscale
-        end_x = (self.oval_end_y+bbox2[1]-bbox1[1])/self.imscale
-        self.segimage = self.__add_new_mask(self.segimage, start_x, start_y, end_x, end_y)
-        self.show_image()
+        if self.delete_mode == -1:
+            self.canvas.delete(self.oval)
+            bbox1 = self.canvas.bbox(self.container)  # get image area
+            bbox1 = (bbox1[0] + 1, bbox1[1] + 1, bbox1[2] - 1, bbox1[3] - 1)
+            bbox2 = (self.canvas.canvasx(0),  # get visible area of the canvas
+                     self.canvas.canvasy(0),
+                     self.canvas.canvasx(self.canvas.winfo_width()),
+                     self.canvas.canvasy(self.canvas.winfo_height()))
+            start_y = (self.oval_start_x+bbox2[0]-bbox1[0])/self.imscale
+            start_x = (self.oval_start_y+bbox2[1]-bbox1[1])/self.imscale
+            end_y = (self.oval_end_x+bbox2[0]-bbox1[0])/self.imscale
+            end_x = (self.oval_end_y+bbox2[1]-bbox1[1])/self.imscale
+            self.segimage = self.__add_new_mask(self.segimage, start_x, start_y, end_x, end_y)
+            self.show_image()
 
     def __move_from(self, event):
         ''' Remember previous coordinates for scrolling with the mouse '''
@@ -296,6 +302,16 @@ class Zoom_Advanced(ttk.Frame):
         if event.keysym == 'Escape': # open a new image
             self.master.destroy()
             quit()
+
+        if event.keysym == 'd': # switch between select mode and delete mode
+            if self.delete_mode == -1:
+                self.text = tk.Label(self.root, text='Delete Mode', font=("Arial",12))
+                self.text.grid(row=0, column=0, sticky='NW')
+            else:
+                self.text.destroy()
+                
+            self.delete_mode = -self.delete_mode
+            self.show_image()
 
     def show_image(self, event=None):
         ''' Show image on the Canvas '''
