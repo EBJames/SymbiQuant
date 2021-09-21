@@ -156,8 +156,10 @@ for f in os.listdir(input_path):
                 f.write(im + str(count) +'\n')
 '''
 
-count_file = '/Users/ed/Downloads/PIPE_area.txt'
-input_path = '/Users/ed/Documents/UM/NN_outs/done'
+count_file = '/Users/ebjam/Downloads/test_image_by_age-20210802T182613Z-001/test_image_by_age/qc_count.txt'
+input_path = '/Users/ebjam/Downloads/test_image_by_age-20210802T182613Z-001/test_image_by_age'
+#"C:\Users\ebjam\Downloads\test_image_by_age-20210802T182613Z-001\test_image_by_age"
+
 for f in os.listdir(input_path):
     if f.startswith('.'):
         print(f)
@@ -176,7 +178,7 @@ for f in os.listdir(input_path):
                 total_buc_area = get_total_area(result_file)
                 avg_buc_area_std = get_std_area(result_file)
                 individual_buchnera = individual_buchnera_areas(result_file)
-                area_no_overlap = get_total_area_without_buc_overlaps(result_file)
+                #area_no_overlap = get_total_area_without_buc_overlaps(result_file)
                 with open(count_file, 'a+') as f:
                     print(count)
-                    f.write('qc' + im + 'count: ' + str(count) + ' total buc area with overlaps:' + str(total_buc_area) + ' total buc area no overlaps:' + str(area_no_overlap) + '\n')
+                    f.write('qc' + im + 'count: ' + str(count) + '\n')

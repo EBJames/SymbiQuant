@@ -4,7 +4,7 @@ print(torch.__version__, torch.cuda.is_available())
 import detectron2
 from detectron2.utils.logger import setup_logger
 setup_logger()
-print(')
+print('')
 
 # import some common libraries
 import numpy as np
@@ -41,11 +41,11 @@ cfg.SOLVER.CHECKPOINT_PERIOD = 1000
 cfg.MODEL.ANCHOR_GENERATOR.SIZES = [[32], [64], [128], [128]]
 cfg.MODEL.ANCHOR_GENERATOR.ASPECT_RATIOS = [[1.0]]
 cfg.MODEL.RPN.IN_FEATURES = ["p2", "p3", "p4", "p5"]
-#Bring in weights from Buchnearer
-cfg.MODEL.WEIGHTS = "/content/20210410_30000.pth"
+#Bring in weights from Buchnearer - can be swapped for custom training sets!
+cfg.MODEL.WEIGHTS = "/content/model_final_randomscale_0.5_1_40000.pth"
 
 cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.5   # set the testing threshold for this model, higher = more certainty but worse inclusion, lower = less certainty, but better inclusion
-cfg.TEST.DETECTIONS_PER_IMAGE = 5000 #max number of objects per image. 5000 should be overkill, I think there are rarely more than 2000
+cfg.TEST.DETECTIONS_PER_IMAGE = 5000 #max number of objects per image. 
 cfg.DATASETS.TEST = ("Buchnearer", )
 
 predictor = DefaultPredictor(cfg)
@@ -54,9 +54,10 @@ from Buchnearer import Buchnearer_detector
 #input_path = '/home/xupan/Projects/Buchnearer/test_image_by_age'
 for f in os.listdir(input_path):
     age_folder = join(input_path, f)
+    output_path = join(age_folder,'Prediction')
+    os.mkdir(output_path)
     for im in os.listdir(age_folder):
         if im[-1] == 'g':
             print(im)
-            output_path = join(age_folder,'Prediction')
-            os.mkdir(output_path) ###
+
             Buchnearer_detector(join(age_folder, im),join(output_path, im),predictor, visualize=True, save_result=True)
