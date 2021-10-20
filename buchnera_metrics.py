@@ -156,8 +156,8 @@ for f in os.listdir(input_path):
                 f.write(im + str(count) +'\n')
 '''
 
-count_file = '/Users/ebjam/Downloads/test_image_by_age-20210802T182613Z-001/test_image_by_age/qc_count.txt'
-input_path = '/Users/ebjam/Downloads/test_image_by_age-20210802T182613Z-001/test_image_by_age'
+count_file = '/Users/ebjam/Downloads/groups-20210921T164950Z-001/groups/buch_qc_count.txt'
+input_path = '/Users/ebjam/Downloads/groups-20210921T164950Z-001/groups'
 #"C:\Users\ebjam\Downloads\test_image_by_age-20210802T182613Z-001\test_image_by_age"
 
 for f in os.listdir(input_path):
@@ -172,13 +172,14 @@ for f in os.listdir(input_path):
                 print(im)
                 result_file = join(age_folder, 'Prediction/qc' + im[0:-3] + 'result') # find result here (maybe from "age_foler" & "im").
                 output_file = join(age_folder, 'Prediction/qc' + im) # change this
-                #get_segimg(join(age_folder, im), result_file, output_file)
+                get_segimg(join(age_folder, im), result_file, output_file)
                 count = get_cellcount(result_file)
                 avg_buc_area = get_average_area(result_file)
                 total_buc_area = get_total_area(result_file)
                 avg_buc_area_std = get_std_area(result_file)
                 individual_buchnera = individual_buchnera_areas(result_file)
-                #area_no_overlap = get_total_area_without_buc_overlaps(result_file)
+                area_no_overlap = get_total_area_without_buc_overlaps(result_file)
                 with open(count_file, 'a+') as f:
                     print(count)
-                    f.write('qc' + im + 'count: ' + str(count) + '\n')
+                    #f.write('qc' + im + 'count: ' + str(count) + 'total buc area:' + str(area_no_overlap) + '\n')
+                    f.write('qc' + im + 'individual Buchnera:' + str(individual_buchnera))

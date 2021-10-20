@@ -37,7 +37,7 @@ cfg.MODEL.ROI_HEADS.BATCH_SIZE_PER_IMAGE = 1024 #1024 in 20201103
 cfg.MODEL.ROI_HEADS.NUM_CLASSES = 1 
 cfg.TEST.DETECTIONS_PER_IMAGE = 3000
 cfg.SOLVER.CHECKPOINT_PERIOD = 1000
-cfg.MODEL.WEIGHTS = "/content/split_and_zoom_20201126.pth"
+cfg.MODEL.WEIGHTS = "/content/model_final_randomscale_0.5_1_40000.pth"
 cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.2   # set the testing threshold for this model, higher = more certainty but worse inclusion, lower = less certainty, but better inclusion
 cfg.TEST.DETECTIONS_PER_IMAGE = 5000 #max number of objects per image. 5000 should be overkill, I think there are rarely more than 2000
 cfg.DATASETS.TEST = ("Buchnearer", )
@@ -204,7 +204,7 @@ def Buchnearer_detector(input_file, output_file, predictor, visualize=False, sav
 
     filtered_boxes,filtered_masks,filtered_scores = delete_overlap(filtered_boxes,filtered_masks,filtered_scores)
     
-    f = open('/content/PIPE_count.txt', "a")
+    f = open('/content/SymbiQuant_count_noQC.txt', "a")
     f.write('Buchenera count: {} '.format(len(filtered_masks)) + input_file + '\n')
     f.close()
     

@@ -59,5 +59,4 @@ for f in os.listdir(input_path):
     for im in os.listdir(age_folder):
         if im[-1] == 'g':
             print(im)
-
             Buchnearer_detector(join(age_folder, im),join(output_path, im),predictor, visualize=True, save_result=True)
