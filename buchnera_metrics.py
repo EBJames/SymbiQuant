@@ -1,10 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Created on Mon Jul  5 16:50:43 2021
-
-@author: ed
-"""
 import cv2
 import pickle
 import numpy as np
@@ -80,18 +73,18 @@ def __add_all_masks(image, masks, color):
         return mask_image
 
 def get_segimg(im_file, result_file, output_file):
-	image = cv2.imread(im_file)
-	with open(result_file, 'rb') as dbfile:      
-	            result = pickle.load(dbfile)
-	masks = result['masks']
-	assigned_colors = [_COLORS[int(hashlib.sha256(str(masks[i]).encode('utf-8')).hexdigest(), 16) % 55] for i in range(len(masks))]
-	segimage = __add_all_masks(image, masks, assigned_colors)
-	cv2.imwrite(output_file, segimage)
+    image = cv2.imread(im_file)
+    with open(result_file, 'rb') as dbfile:      
+                result = pickle.load(dbfile)
+    masks = result['masks']
+    assigned_colors = [_COLORS[int(hashlib.sha256(str(masks[i]).encode('utf-8')).hexdigest(), 16) % 55] for i in range(len(masks))]
+    segimage = __add_all_masks(image, masks, assigned_colors)
+    cv2.imwrite(output_file, segimage)
 
 def get_cellcount(result_file):
-	with open(result_file, 'rb') as dbfile:      
-	            result = pickle.load(dbfile)
-	return len(result['masks'])
+    with open(result_file, 'rb') as dbfile:      
+                result = pickle.load(dbfile)
+    return len(result['masks'])
 
 
 def get_average_area(result_file):
@@ -127,7 +120,27 @@ def individual_buchnera_areas(result_file):
                 areas.append(area)
     return areas
                 
-
+def get_perimeter_fit_ellipse(result_file):
+    ellipses = []
+    perimeters = []
+    with open(result_file, 'rb') as dbfile:      
+            result = pickle.load(dbfile)
+            for buchnera in range(len(result['masks'])):
+                shift = np.min(result['masks'][buchnera],axis=0)
+                mask = np.asarray([result['masks'][buchnera][:,0]-shift[0]+1, result['masks'][buchnera][:,1]-shift[1]+1]).T
+                size = np.max(mask,axis=0)
+                mask_im = np.zeros((size[0]+2,size[1]+2)).astype(np.uint8)
+                for [x,y] in mask:
+                    mask_im[x,y] = 1
+                contours, hierarchy = cv2.findContours(mask_im, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+                if len(contours)>1:
+                    print('Warning: Discontinuous area.')
+                    cnt = contours[np.argmax([len(x) for x in contours])]
+                else:
+                    cnt = contours[0]
+                ellipses.append(cv2.fitEllipse(cnt)) #((center_x,center_y),(width,height),rotation)
+                perimeters.append(cv2.arcLength(cnt,True))
+    return perimeters, ellipses #((center_x,center_y),(width,height),rotation)
             
 '''
 # get new segmentation images:
@@ -141,9 +154,6 @@ for f in os.listdir(input_path):
             result_file = os.path.join(age_folder, qcname) # find result here (maybe from "age_foler" & "im").
             output_file = os.path.join(im, '_qc.png') # change this
             get_segimg(im, result_file, output_file)
-
-
-
 #get cell count:
 count_file = '/Users/ed/Documents/UM/NN_outs/qc_check/qc_check.txt'
 input_path = '/Users/ed/Documents/UM/NN_outs/qc_check'
